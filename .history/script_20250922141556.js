@@ -94,16 +94,12 @@
     const bottom = window.innerHeight - 4;
     // Anchor positions at rod tip in page coords
     const boatRect = boat.getBoundingClientRect();
-    const rodTip = { x: boatRect.left + 110, y: boatRect.top + 14 };
-    // Hook SVG geometry (viewBox 0 0 24 36): eye at roughly (16, 2)
-    const HOOK_EYE_X = 16; // px within SVG
-    const HOOK_EYE_Y = 2;  // px within SVG
+    const rodTip = { x: boatRect.left + 106, y: boatRect.top + 8 };
     if (hookState.phase === 'drop') {
       // Ensure line spans to bottom and hook sits near bottom
       lineEl.style.height = (bottom - rodTip.y) + 'px';
-      // Position hook so its eye aligns with the line X and starts at bottom
-      hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
-      hookEl.style.top = (rodTip.y - boatRect.top + (bottom - rodTip.y) - (HOOK_EYE_Y + 2)) + 'px';
+      hookEl.style.left = (106 - 6) + 'px';
+      hookEl.style.top = (8 + (bottom - rodTip.y) - 18) + 'px';
       hookState.phase = 'jig';
       hookState.lastChange = now;
       hookState.targetY = bottom - 30;
@@ -112,25 +108,24 @@
     // Jigging: random small upward hops, then fall back
     const hookRect = hookEl.getBoundingClientRect();
     const hookY = hookRect.top + hookRect.height / 2;
-    if (now - hookState.lastChange > 600 + Math.random() * 600) {
-      hookState.targetY = Math.max(waterTop + 60, hookY - (30 + Math.random() * 60));
+    if (now - hookState.lastChange > 700 + Math.random() * 700) {
+      hookState.targetY = Math.max(waterTop + 60, hookY - (20 + Math.random() * 40));
       hookState.lastChange = now;
     }
     // Move toward targetY smoothly
-    const dy = (hookState.targetY - hookY) * 0.14;
+    const dy = (hookState.targetY - hookY) * 0.1;
     const newTop = hookY + dy;
     const maxTop = bottom - 12;
     const clampedTop = Math.min(maxTop, Math.max(waterTop + 40, newTop));
-    // Position hook (absolute within boat) using page→boat coordinates
+    // Convert to bottom offset relative to line container
     const newHookTop = clampedTop - hookRect.height / 2;
-    // Keep hook horizontally anchored so the eye stays on the line
-    hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
-    hookEl.style.top = (newHookTop - boatRect.top) + 'px';
+    hookEl.style.top = newHookTop + 'px';
 
-    // Reel-in effect: simply shorten the line element height to the hook
-    const hookEyePageY = (newHookTop + HOOK_EYE_Y); // page Y for hook eye
-    const visibleHeight = Math.max(0, hookEyePageY - rodTip.y);
-    lineEl.style.height = visibleHeight + 'px';
+    // Reel-in effect: shorten visible line to the hook tip
+    const lineRect = lineEl.getBoundingClientRect();
+    const newLineHeight = Math.max(0, (newHookTop + hookRect.height / 2) - rodTip.y);
+    lineEl.style.setProperty('mask-image', `linear-gradient(to bottom, black ${newLineHeight}px, transparent ${newLineHeight}px)`);
+    lineEl.style.setProperty('-webkit-mask-image', `linear-gradient(to bottom, black ${newLineHeight}px, transparent ${newLineHeight}px)`);
   }
 
   document.addEventListener('keydown', (e) => {
@@ -197,7 +192,7 @@
     if (lineEl && boat) {
       const bottom = window.innerHeight - 4;
       const boatRect = boat.getBoundingClientRect();
-      const rodTipY = boatRect.top + 14;
+      const rodTipY = boatRect.top + 8;
       lineEl.style.height = (bottom - rodTipY) + 'px';
     }
   });

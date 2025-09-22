@@ -2,9 +2,6 @@
 (function () {
   const fish = document.getElementById('fish');
   const sprite = fish ? fish.querySelector('.sprite') : null;
-  const boat = document.querySelector('.boat');
-  const lineEl = boat ? boat.querySelector('.line') : null;
-  const hookEl = boat ? boat.querySelector('.hook') : null;
   if (!fish) return;
 
   // Ensure fish faces right
@@ -20,14 +17,6 @@
   let vy = 0;
   let spacePressed = false;
   let paused = false;
-  function getFishHalfHeight() {
-    try {
-      const rect = (sprite || fish).getBoundingClientRect();
-      return Math.max(8, (rect.height || 32) / 2);
-    } catch (_) {
-      return 16; // fallback for early frames
-    }
-  }
 
   // Tunables
   function scale() { return Math.max(0.8, Math.min(2.0, window.innerWidth / 1200)); }
@@ -69,9 +58,8 @@
     }
     // Compute waterline as top at 1/6 viewport height
     const waterlineY = window.innerHeight / 6;
-    // Keep the fish's center at least one pixel below the waterline + half its height
-    const halfH = getFishHalfHeight();
-    const topClamp = Math.max(0, waterlineY + halfH + 1);
+    // Bottom clamp remains near bottom; top clamp is just below the waterline
+    const topClamp = Math.max(0, waterlineY - 24); // keep emoji body just under line
     const bottomClamp = window.innerHeight - 40;
     y = Math.max(topClamp, Math.min(bottomClamp, y + vy));
 
@@ -79,58 +67,7 @@
     fish.style.left = x + 'px';
     fish.style.top = y + 'px';
 
-    // Simple jig animation for hook: hold near bottom, then hop upward irregularly
-    animateHook();
-
     requestAnimationFrame(loop);
-  }
-
-  // --- Fishing line + hook motion ---
-  let hookState = { phase: 'drop', targetY: 0, lastChange: 0 };
-  function animateHook() {
-    if (!lineEl || !hookEl) return;
-    const now = performance.now();
-    const waterTop = window.innerHeight / 6;
-    const bottom = window.innerHeight - 4;
-    // Anchor positions at rod tip in page coords
-    const boatRect = boat.getBoundingClientRect();
-    const rodTip = { x: boatRect.left + 110, y: boatRect.top + 14 };
-    // Hook SVG geometry (viewBox 0 0 24 36): eye at roughly (16, 2)
-    const HOOK_EYE_X = 16; // px within SVG
-    const HOOK_EYE_Y = 2;  // px within SVG
-    if (hookState.phase === 'drop') {
-      // Ensure line spans to bottom and hook sits near bottom
-      lineEl.style.height = (bottom - rodTip.y) + 'px';
-      // Position hook so its eye aligns with the line X and starts at bottom
-      hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
-      hookEl.style.top = (rodTip.y - boatRect.top + (bottom - rodTip.y) - (HOOK_EYE_Y + 2)) + 'px';
-      hookState.phase = 'jig';
-      hookState.lastChange = now;
-      hookState.targetY = bottom - 30;
-      return;
-    }
-    // Jigging: random small upward hops, then fall back
-    const hookRect = hookEl.getBoundingClientRect();
-    const hookY = hookRect.top + hookRect.height / 2;
-    if (now - hookState.lastChange > 600 + Math.random() * 600) {
-      hookState.targetY = Math.max(waterTop + 60, hookY - (30 + Math.random() * 60));
-      hookState.lastChange = now;
-    }
-    // Move toward targetY smoothly
-    const dy = (hookState.targetY - hookY) * 0.14;
-    const newTop = hookY + dy;
-    const maxTop = bottom - 12;
-    const clampedTop = Math.min(maxTop, Math.max(waterTop + 40, newTop));
-    // Position hook (absolute within boat) using page→boat coordinates
-    const newHookTop = clampedTop - hookRect.height / 2;
-    // Keep hook horizontally anchored so the eye stays on the line
-    hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
-    hookEl.style.top = (newHookTop - boatRect.top) + 'px';
-
-    // Reel-in effect: simply shorten the line element height to the hook
-    const hookEyePageY = (newHookTop + HOOK_EYE_Y); // page Y for hook eye
-    const visibleHeight = Math.max(0, hookEyePageY - rodTip.y);
-    lineEl.style.height = visibleHeight + 'px';
   }
 
   document.addEventListener('keydown', (e) => {
@@ -186,20 +123,12 @@
 
   window.addEventListener('resize', () => {
     x = Math.min(x, window.innerWidth - 40);
-    // Re-apply clamp relative to new waterline and fish size
+    // Re-apply clamp relative to new waterline
     const waterlineY = window.innerHeight / 6;
-    const halfH = getFishHalfHeight();
-    const topClamp = Math.max(0, waterlineY + halfH + 1);
+    const topClamp = Math.max(0, waterlineY - 24);
     const bottomClamp = window.innerHeight - 40;
     y = Math.max(topClamp, Math.min(bottomClamp, y));
     updateSpeed();
-    // Recompute line length on resize
-    if (lineEl && boat) {
-      const bottom = window.innerHeight - 4;
-      const boatRect = boat.getBoundingClientRect();
-      const rodTipY = boatRect.top + 14;
-      lineEl.style.height = (bottom - rodTipY) + 'px';
-    }
   });
 
   // Init

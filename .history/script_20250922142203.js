@@ -95,15 +95,11 @@
     // Anchor positions at rod tip in page coords
     const boatRect = boat.getBoundingClientRect();
     const rodTip = { x: boatRect.left + 110, y: boatRect.top + 14 };
-    // Hook SVG geometry (viewBox 0 0 24 36): eye at roughly (16, 2)
-    const HOOK_EYE_X = 16; // px within SVG
-    const HOOK_EYE_Y = 2;  // px within SVG
     if (hookState.phase === 'drop') {
       // Ensure line spans to bottom and hook sits near bottom
       lineEl.style.height = (bottom - rodTip.y) + 'px';
-      // Position hook so its eye aligns with the line X and starts at bottom
-      hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
-      hookEl.style.top = (rodTip.y - boatRect.top + (bottom - rodTip.y) - (HOOK_EYE_Y + 2)) + 'px';
+      hookEl.style.left = (rodTip.x - boatRect.left - 8) + 'px';
+      hookEl.style.top = (rodTip.y - boatRect.top + (bottom - rodTip.y) - 18) + 'px';
       hookState.phase = 'jig';
       hookState.lastChange = now;
       hookState.targetY = bottom - 30;
@@ -123,13 +119,10 @@
     const clampedTop = Math.min(maxTop, Math.max(waterTop + 40, newTop));
     // Position hook (absolute within boat) using page→boat coordinates
     const newHookTop = clampedTop - hookRect.height / 2;
-    // Keep hook horizontally anchored so the eye stays on the line
-    hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
     hookEl.style.top = (newHookTop - boatRect.top) + 'px';
 
     // Reel-in effect: simply shorten the line element height to the hook
-    const hookEyePageY = (newHookTop + HOOK_EYE_Y); // page Y for hook eye
-    const visibleHeight = Math.max(0, hookEyePageY - rodTip.y);
+    const visibleHeight = Math.max(0, (newHookTop + hookRect.height / 2) - rodTip.y);
     lineEl.style.height = visibleHeight + 'px';
   }
 

@@ -1,0 +1,30 @@
+/* Basic starter styling */
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: #0a3454;
+    color: #fff;
+  }
+
+#game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: linear-gradient(#5ec7ff 0%, #2aa3e6 20%, #0b6fb8 100%);
+  }
+
+#fish {
+    position: absolute;
+    left: 24px;
+    top: 50vh;
+    transform: translateY(-50%);
+    font-size: 32px;
+    line-height: 1;
+    user-select: none;
+  }
+  #fish .sprite { display: inline-block; font-size: 32px; width: 1em; height: 1em; }
+  /* Emoji orientation mappings */
+  /* Most platforms render 🐟 facing left by default (head on left). */
+  #fish .face-left { transform: scaleX(1); }
+  #fish .face-right { transform: scaleX(-1); }

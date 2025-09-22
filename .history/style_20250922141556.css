@@ -54,8 +54,8 @@ body {
   .boat svg { width: 100%; height: 100%; display: block; }
   .boat .line {
     position: absolute;
-    left: 110px; /* exact rod tip in SVG coords */
-    top: 14px;
+    left: 106px; /* tip of rod */
+    top: 8px;
     width: 2px;
     height: calc(100vh - (100vh / 6)); /* down to bottom */
     background: linear-gradient(to bottom, rgba(30,60,100,0.6), rgba(30,60,100,0.3));
@@ -64,13 +64,23 @@ body {
   }
   .boat .hook {
     position: absolute;
-    left: 100px; /* adjusted for SVG viewBox */
-    top: 14px;
-    width: 24px; height: 36px;
-    z-index: 3;
-    display: block;
+    left: 100px; /* near line x */
+    top: 8px;   /* start at rod tip; JS repositions */
+    width: 16px; height: 18px;
+    border-bottom: 3px solid #000000; /* shank curve */
+    border-right: 3px solid #000000;
+    border-radius: 0 0 16px 0;
+    transform: rotate(35deg);
+    z-index: 2;
   }
-  .boat .hook path { vector-effect: non-scaling-stroke; }
+  .boat .hook .barb {
+    position: absolute;
+    right: -2px; bottom: 0;
+    width: 10px; height: 10px;
+    border-right: 3px solid #000000;
+    border-bottom: 3px solid transparent;
+    transform: rotate(-55deg);
+  }
 
 @keyframes bob {
   0%   { transform: translateY(0) rotate(-0.6deg); }
