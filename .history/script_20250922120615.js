@@ -124,7 +124,5 @@
 
   // Init
   updateSpeed();
-  // Ensure initial facing matches starting direction (right)
-  if (sprite) { sprite.classList.add('face-right'); }
   loop();
 })();

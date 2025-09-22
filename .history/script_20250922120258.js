@@ -1,7 +1,6 @@
 // Fish movement prototype: slow downward drift, space = up/forward, 3 speeds (←/→)
 (function () {
   const fish = document.getElementById('fish');
-  const sprite = fish ? fish.querySelector('.sprite') : null;
   if (!fish) return;
 
   // Ensure fish faces right
@@ -33,16 +32,6 @@
 
   function updateSpeed() {
     speed = dir * (BASE_SPEEDS[speedIndex] * scale());
-    // Update facing based on direction
-    if (sprite) {
-      if (dir === 1) {
-        sprite.classList.remove('face-left');
-        sprite.classList.add('face-right');
-      } else {
-        sprite.classList.remove('face-right');
-        sprite.classList.add('face-left');
-      }
-    }
   }
 
   function loop() {
@@ -124,7 +113,5 @@
 
   // Init
   updateSpeed();
-  // Ensure initial facing matches starting direction (right)
-  if (sprite) { sprite.classList.add('face-right'); }
   loop();
 })();

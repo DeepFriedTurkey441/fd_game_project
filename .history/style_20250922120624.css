@@ -23,8 +23,6 @@ body {
     line-height: 1;
     user-select: none;
   }
-  #fish .sprite { display: inline-block; font-size: 32px; width: 1em; height: 1em; }
-  /* Emoji orientation mappings */
-  /* Most platforms render 🐟 facing left by default (head on left). */
-  #fish .face-left { transform: scaleX(1); }
+  #fish .sprite { display: inline-block; }
   #fish .face-right { transform: scaleX(-1); }
+  #fish .face-left { transform: scaleX(1); }
