@@ -94,40 +94,20 @@
       <g id="plants" transform="translate(0,0)"></g>
       <!-- treasure chest (position adjusted via script to track visible right edge) -->
       <g id="treasure" transform="translate(1074, 520)">
-        <!-- base chest -->
-        <g id="chestBase">
-          <rect x="-40" y="20" width="110" height="44" rx="4" ry="4" fill="#7b4a1d" stroke="#4a2b10" stroke-width="3"/>
-          <!-- front rim -->
+        <g>
+          <!-- base chest -->
+          <rect x="-40" y="20" width="110" height="42" rx="4" ry="4" fill="#7b4a1d" stroke="#4a2b10" stroke-width="3"/>
           <rect x="-40" y="20" width="110" height="14" fill="#8d5a26"/>
-          <!-- inner gold pile visible due to open lid -->
-          <path d="M-36 34 C -20 18, 10 12, 30 18 C 48 22, 62 28, 68 34 L 68 44 L -36 44 Z" fill="#ffd34d"/>
+          <!-- lid -->
+          <path d="M-40 20 Q 15 -6 70 20 L 70 32 Q 15 8 -40 32 Z" fill="#9c6329" stroke="#4a2b10" stroke-width="3"/>
           <!-- banding -->
-          <rect x="10" y="20" width="8" height="44" fill="#b47d2a"/>
-          <rect x="52" y="20" width="8" height="44" fill="#b47d2a"/>
-          <!-- lock plate -->
+          <rect x="10" y="20" width="8" height="42" fill="#b47d2a"/>
+          <rect x="52" y="20" width="8" height="42" fill="#b47d2a"/>
+          <!-- lock -->
           <rect x="30" y="32" width="12" height="16" rx="2" ry="2" fill="#333"/>
           <circle cx="36" cy="40" r="3" fill="#c1a857"/>
         </g>
-        <!-- open lid (tilted back) -->
-        <path d="M-40 20 Q 15 -10 70 20 L 70 10 Q 15 -20 -40 10 Z" fill="#9c6329" stroke="#4a2b10" stroke-width="3"/>
-        <!-- bursting treasure: coins and gems -->
-        <g>
-          <!-- coin stack -->
-          <g fill="#ffd34d" stroke="#d0a62b" stroke-width="0.8">
-            <circle cx="-10" cy="18" r="3"/>
-            <circle cx="0" cy="14" r="3.6"/>
-            <circle cx="10" cy="17" r="3.2"/>
-            <circle cx="22" cy="15" r="3.2"/>
-            <circle cx="34" cy="18" r="2.8"/>
-          </g>
-          <!-- gems -->
-          <g stroke="#2a2a2a" stroke-width="0.6">
-            <path d="M-4 10 L 0 6 L 4 10 L 0 14 Z" fill="#55ffff"/>
-            <path d="M12 6 L 16 2 L 20 6 L 16 10 Z" fill="#ff55ff"/>
-            <path d="M30 8 L 34 4 L 38 8 L 34 12 Z" fill="#55ff7a"/>
-          </g>
-        </g>
-        <!-- spilled coins on sand -->
+        <!-- a few coins spilling out -->
         <g fill="#ffd34d">
           <ellipse cx="-6" cy="68" rx="8" ry="4"/>
           <ellipse cx="6" cy="70" rx="6" ry="3"/>

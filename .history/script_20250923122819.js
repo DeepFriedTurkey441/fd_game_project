@@ -6,9 +6,7 @@
   const lineEl = boat ? boat.querySelector('.line') : null;
   const hookEl = boat ? boat.querySelector('.hook') : null;
   // Hook motion tuning
-  const RISE_SPEED = 0.06; // lower is slower
-  const DOWN_SPEED = 0.09; // drop pace
-  const JIG_PAUSE_MS = 220; // small dwell between upward steps
+  const RISE_SPEED = 0.08; // lower is slower
   const plantsGroup = document.querySelector('#aquarium-bg #plants');
   const grassBackGroup = document.querySelector('#aquarium-bg #grass-back');
   const treasureGroup = document.querySelector('#aquarium-bg #treasure');
@@ -265,43 +263,25 @@
     // Hook SVG geometry (viewBox 0 0 24 36): eye at roughly (16, 2)
     const HOOK_EYE_X = 16; // px within SVG
     const HOOK_EYE_Y = 2;  // px within SVG
-    // Determine target and speed by phase
+    if (hookState.phase === 'drop') {
+      // Ensure line spans to bottom and hook sits near bottom
+      lineEl.style.height = (bottom - rodTip.y) + 'px';
+      // Position hook so its eye aligns with the line X and starts at bottom
+      hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
+      hookEl.style.top = (rodTip.y - boatRect.top + (bottom - rodTip.y) - (HOOK_EYE_Y + 2)) + 'px';
+      // Start a full rise toward near-surface, then we will drop again
+      hookState.phase = 'rise';
+      hookState.lastChange = now;
+      hookState.targetY = waterTop + 58; // just below the waterline
+      // Trigger a one-time cast animation when flag is ON
+      if (FEATURES.casting) startCast(now);
+      return;
+    }
+    // Rising toward near-surface
     const hookRect = hookEl.getBoundingClientRect();
     const hookY = hookRect.top + hookRect.height / 2;
-    let speed = 0;
-    if (hookState.phase === 'drop') {
-      if (!hookState.targetY || hookState.targetY < bottom - 12) hookState.targetY = bottom - 12;
-      speed = DOWN_SPEED;
-      // Optional: trigger cast on first cycle
-      if (FEATURES.casting && hookState.lastChange === 0) startCast(now);
-    } else if (hookState.phase === 'jig_up') {
-      if (now - hookState.lastChange > JIG_PAUSE_MS + Math.random() * 300) {
-        hookState.targetY = Math.max(waterTop + 58, hookY - (30 + Math.random() * 60));
-        hookState.lastChange = now;
-      }
-      speed = RISE_SPEED;
-      if (hookY <= waterTop + 62) {
-        hookState.phase = 'top_pause';
-        hookState.lastChange = now;
-      }
-    } else if (hookState.phase === 'top_pause') {
-      speed = 0;
-      hookState.targetY = hookY; // hold briefly
-      if (now - hookState.lastChange > 280) {
-        hookState.phase = 'drop';
-        hookState.targetY = bottom - 12;
-        hookState.lastChange = now;
-      }
-    } else {
-      // default/initial after startup: begin upward jigging
-      hookState.phase = 'jig_up';
-      hookState.targetY = Math.max(waterTop + 58, hookY - (30 + Math.random() * 60));
-      hookState.lastChange = now;
-      speed = RISE_SPEED;
-    }
-
-    // Move toward targetY smoothly
-    const dy = (hookState.targetY - hookY) * speed;
+    // Move toward targetY smoothly (upwards)
+    const dy = (hookState.targetY - hookY) * RISE_SPEED;
     const newTop = hookY + dy;
     const maxTop = bottom - 12;
     const clampedTop = Math.min(maxTop, Math.max(waterTop + 40, newTop));
@@ -315,10 +295,12 @@
     const hookEyePageY = (newHookTop + HOOK_EYE_Y); // page Y for hook eye
     const visibleHeight = Math.max(0, hookEyePageY - rodTip.y);
     lineEl.style.height = visibleHeight + 'px';
-    // If we just finished a drop, transition to jigging once we touch bottom
-    if (hookState.phase === 'drop' && Math.abs(clampedTop - hookState.targetY) < 3) {
-      hookState.phase = 'jig_up';
+
+    // When we reach near the surface target, immediately drop next frame
+    if (Math.abs(clampedTop - hookState.targetY) < 3) {
+      hookState.phase = 'drop';
       hookState.lastChange = now;
+      return;
     }
 
     if (FEATURES.casting) stepCast(now);

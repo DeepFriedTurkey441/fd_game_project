@@ -5,13 +5,12 @@ body {
     background-color: #0a3454;
     color: #fff;
   }
-html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
 
 #game {
     position: relative;
     width: 100vw;
     height: 100vh;
-    overflow: visible; /* allow rightmost SVG content to reach the viewport edge */
+    overflow: hidden;
     background: linear-gradient(#f9fbff 0%, #eaf3ff 16.66%, #5ec7ff 16.66%, #2aa3e6 36%, #0b6fb8 100%);
   }
 
@@ -56,17 +55,17 @@ html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   /* (reverted) */
 
 /* Realistic aquarium background container */
-#aquarium-bg { position:absolute; left:0; right:0; bottom:0; height: 62vh; z-index:1; pointer-events:none; overflow:visible; }
+#aquarium-bg { position:absolute; left:0; right:0; bottom:0; height: 62vh; z-index:1; pointer-events:none; }
 /* Plant sway animations */
-.sway { --sx:1; --sy:1; animation: sway 6s ease-in-out infinite; transform-origin: 50% 100%; transform-box: fill-box; }
+.sway { animation: sway 6s ease-in-out infinite; transform-origin: 50% 100%; }
 .sway.slow { animation-duration: 8.5s; }
 .sway.fast { animation-duration: 4.5s; }
 @keyframes sway {
-  0% { transform: scale(var(--sx), var(--sy)) rotate(0deg); }
-  25% { transform: scale(var(--sx), var(--sy)) rotate(2.2deg); }
-  50% { transform: scale(var(--sx), var(--sy)) rotate(-2.8deg); }
-  75% { transform: scale(var(--sx), var(--sy)) rotate(1.6deg); }
-  100% { transform: scale(var(--sx), var(--sy)) rotate(0deg); }
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(2.2deg); }
+  50% { transform: rotate(-2.8deg); }
+  75% { transform: rotate(1.6deg); }
+  100% { transform: rotate(0deg); }
 }
 
 /* God-rays */

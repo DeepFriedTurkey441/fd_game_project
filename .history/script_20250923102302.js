@@ -5,16 +5,8 @@
   const boat = document.querySelector('.boat');
   const lineEl = boat ? boat.querySelector('.line') : null;
   const hookEl = boat ? boat.querySelector('.hook') : null;
-  // Hook motion tuning
-  const RISE_SPEED = 0.06; // lower is slower
-  const DOWN_SPEED = 0.09; // drop pace
-  const JIG_PAUSE_MS = 220; // small dwell between upward steps
   const plantsGroup = document.querySelector('#aquarium-bg #plants');
   const grassBackGroup = document.querySelector('#aquarium-bg #grass-back');
-  const treasureGroup = document.querySelector('#aquarium-bg #treasure');
-  // Edge placement controls
-  const RIGHT_BAND = 200;   // px in viewBox units (since viewBox width is 1200)
-  const EDGE_ALLOW = 48;    // allow candidates very near the right edge
   // (reverted) no rod group rotation
   const armPath = boat ? boat.querySelector('#arm') : null;
   const rodPath = boat ? boat.querySelector('#rod') : null;
@@ -115,21 +107,10 @@
     // Randomly pick a vibrant accent leaf for variety (symbols only)
     const accents = ['#leafRedSym', '#leafYellowSym', '#leafOrangeSym', '#leafBroad'];
     const accent = accents[Math.floor(Math.random() * accents.length)];
-    const randScaleY = () => (0.7 + Math.random() * 0.9).toFixed(2); // wider height variance
-    const mk = (href, xPos, yPos, speed, sxOverride) => {
-      const el = createUse(href, { x: xPos, y: yPos, class: `sway ${speed||''}`.trim() });
-      const sx = (typeof sxOverride === 'number') ? sxOverride : 1;
-      el.style.setProperty('--sx', String(sx));
-      el.style.setProperty('--sy', randScaleY()); // scale Y only, origin at base
-      return el;
-    };
-    // Skinny factors for purple (leafBroad) and red (leafRedSym)
-    const skinny = () => +(0.6 + Math.random() * 0.25).toFixed(2); // 0.60–0.85
-    g.appendChild(mk('#plantBlade', 0 + Number(jitter()), 396, ''));
-    g.appendChild(mk('#leafBroad', 28 + Number(jitter()), 388, 'fast', skinny()));
-    const accentSx = (accent === '#leafRedSym') ? skinny() : 1;
-    g.appendChild(mk(accent, 60 + Number(jitter()), 388, '', accentSx));
-    g.appendChild(mk('#plantBlade', 88 + Number(jitter()), 402, 'slow'));
+    g.appendChild(createUse('#plantBlade', { x: 0 + Number(jitter()), y: 396, class: 'sway' }));
+    g.appendChild(createUse('#leafBroad', { x: 28 + Number(jitter()), y: 388, class: 'sway fast' }));
+    g.appendChild(createUse(accent, { x: 60 + Number(jitter()), y: 388, class: 'sway' }));
+    g.appendChild(createUse('#plantBlade', { x: 88 + Number(jitter()), y: 402, class: 'sway slow' }));
     plantsGroup.appendChild(g);
   }
   function layoutPlants() {
@@ -143,7 +124,6 @@
     const svgWidthPx = Math.max(1, Math.round(svg.getBoundingClientRect().width || window.innerWidth));
     const viewWidth = 1200; // SVG viewBox width
     const pixelsPerViewUnit = Math.max(0.001, svgWidthPx / viewWidth);
-    const unitsPerPx = 1 / pixelsPerViewUnit;
     // Consistent visual spacing of ~120px
     const visualSpacingPx = 170; // wider spacing so rocks are visible
     const clusterW = Math.max(80, Math.round(visualSpacingPx / pixelsPerViewUnit));
@@ -153,7 +133,6 @@
     const bladeOverhang = 3; // blades beyond each edge
     const bladeStart = -bladeW * bladeOverhang; // extra overhang on left
     const bladeCount = Math.ceil(viewWidth / bladeW) + bladeOverhang * 2; // cover + overhang both sides
-    const scaleRadius = (x, r) => (x >= viewWidth - RIGHT_BAND ? r * 0.5 : r);
     // Rock zones (avoid covering rocks with blades)
     const rocks = [
       { x: 130, r: 85 },
@@ -164,9 +143,8 @@
     if (grassBackGroup) {
       for (let i = 0; i < bladeCount; i++) {
         const bx = bladeStart + i * bladeW;
-        const inRock = rocks.some(r => Math.abs(bx - r.x) < scaleRadius(bx, r.r));
-        // Edge override: always allow blades flush to the right edge
-        if (bx < viewWidth - EDGE_ALLOW && inRock) continue;
+        const inRock = rocks.some(r => Math.abs(bx - r.x) < r.r);
+        if (inRock) continue;
         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         g.setAttribute('transform', `translate(${bx},0)`);
         g.appendChild(createUse('#plantBlade', { x: 0, y: 398, class: 'sway slow' }));
@@ -178,51 +156,15 @@
     const start = -clusterW * overhang;
     const count = Math.ceil(viewWidth / clusterW) + overhang * 2;
     // Also avoid placing clusters over rock zones and treasure chest area
-    // Chest zone positioned from known chest width (110) and 16px margin
-    const chestLeft = viewWidth - 110 - 16;
-    const chestZone = { x1: chestLeft, x2: chestLeft + 110 };
+    const chestZone = { x1: 930, x2: 1110 }; // keep area near chest clearer
     for (let i = 0; i < count; i++) {
       const cx = start + i * clusterW;
-      const nearRock = rocks.some(r => Math.abs(cx - r.x) < scaleRadius(cx, r.r * 0.55));
+      const nearRock = rocks.some(r => Math.abs(cx - r.x) < r.r * 0.7);
       const inChest = (cx > chestZone.x1 && cx < chestZone.x2);
       // Guarantee some edge coverage using overhang slots
       const isEdge = (i < 2 || i > count - 3);
-      // Edge override for very-right candidates
-      const edgeOverride = (cx >= viewWidth - EDGE_ALLOW);
       if (!nearRock && !inChest) addCluster(cx);
-      else if ((isEdge || edgeOverride) && !inChest) addCluster(cx);
-    }
-
-    // Guarantee content in the extreme corner (6–10 blades), ignoring bans
-    function forcedEdgeCluster() {
-      const rightMarginVU = 16 * unitsPerPx; // 16px converted to view units
-      const minX = viewWidth - 120;
-      const maxX = viewWidth - rightMarginVU;
-      const baseX = Math.max(0, Math.min(viewWidth - 20, Math.round((minX + maxX) / 2)));
-      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      g.setAttribute('transform', `translate(${baseX},0)`);
-      const bladeCount = 6 + Math.floor(Math.random() * 5);
-      for (let b = 0; b < bladeCount; b++) {
-        const jitter = (Math.random() * 30 - 15).toFixed(1);
-        const yJitter = (Math.random() * 10 - 5).toFixed(1);
-        const el = createUse('#plantBlade', { x: jitter, y: 398 + Number(yJitter), class: 'sway' });
-        el.style.setProperty('--sx', '1');
-        el.style.setProperty('--sy', (0.7 + Math.random() * 1.0).toFixed(2));
-        g.appendChild(el);
-      }
-      plantsGroup.appendChild(g);
-    }
-    forcedEdgeCluster();
-
-    // Pin the treasure chest to visible right edge with 16px margin (convert px→view units)
-    if (treasureGroup) {
-      const chestWidthVU = 110; // matches chest drawing width
-      const marginVU = 16 * unitsPerPx;
-      // Shift left by ~0.75 inch. Assume 96 CSS px per inch → convert to view units
-      const shiftInPx = 0.75 * 96;
-      const shiftVU = shiftInPx * unitsPerPx;
-      const x = Math.max(0, viewWidth - chestWidthVU - marginVU - shiftVU);
-      treasureGroup.setAttribute('transform', `translate(${Math.round(x)}, 520)`);
+      else if (isEdge && !inChest) addCluster(cx);
     }
   }
 
@@ -265,43 +207,28 @@
     // Hook SVG geometry (viewBox 0 0 24 36): eye at roughly (16, 2)
     const HOOK_EYE_X = 16; // px within SVG
     const HOOK_EYE_Y = 2;  // px within SVG
-    // Determine target and speed by phase
+    if (hookState.phase === 'drop') {
+      // Ensure line spans to bottom and hook sits near bottom
+      lineEl.style.height = (bottom - rodTip.y) + 'px';
+      // Position hook so its eye aligns with the line X and starts at bottom
+      hookEl.style.left = (rodTip.x - boatRect.left - HOOK_EYE_X) + 'px';
+      hookEl.style.top = (rodTip.y - boatRect.top + (bottom - rodTip.y) - (HOOK_EYE_Y + 2)) + 'px';
+      hookState.phase = 'jig';
+      hookState.lastChange = now;
+      hookState.targetY = bottom - 30;
+      // Trigger a one-time cast animation when flag is ON
+      if (FEATURES.casting) startCast(now);
+      return;
+    }
+    // Jigging: random small upward hops, then fall back
     const hookRect = hookEl.getBoundingClientRect();
     const hookY = hookRect.top + hookRect.height / 2;
-    let speed = 0;
-    if (hookState.phase === 'drop') {
-      if (!hookState.targetY || hookState.targetY < bottom - 12) hookState.targetY = bottom - 12;
-      speed = DOWN_SPEED;
-      // Optional: trigger cast on first cycle
-      if (FEATURES.casting && hookState.lastChange === 0) startCast(now);
-    } else if (hookState.phase === 'jig_up') {
-      if (now - hookState.lastChange > JIG_PAUSE_MS + Math.random() * 300) {
-        hookState.targetY = Math.max(waterTop + 58, hookY - (30 + Math.random() * 60));
-        hookState.lastChange = now;
-      }
-      speed = RISE_SPEED;
-      if (hookY <= waterTop + 62) {
-        hookState.phase = 'top_pause';
-        hookState.lastChange = now;
-      }
-    } else if (hookState.phase === 'top_pause') {
-      speed = 0;
-      hookState.targetY = hookY; // hold briefly
-      if (now - hookState.lastChange > 280) {
-        hookState.phase = 'drop';
-        hookState.targetY = bottom - 12;
-        hookState.lastChange = now;
-      }
-    } else {
-      // default/initial after startup: begin upward jigging
-      hookState.phase = 'jig_up';
-      hookState.targetY = Math.max(waterTop + 58, hookY - (30 + Math.random() * 60));
+    if (now - hookState.lastChange > 600 + Math.random() * 600) {
+      hookState.targetY = Math.max(waterTop + 60, hookY - (30 + Math.random() * 60));
       hookState.lastChange = now;
-      speed = RISE_SPEED;
     }
-
     // Move toward targetY smoothly
-    const dy = (hookState.targetY - hookY) * speed;
+    const dy = (hookState.targetY - hookY) * 0.14;
     const newTop = hookY + dy;
     const maxTop = bottom - 12;
     const clampedTop = Math.min(maxTop, Math.max(waterTop + 40, newTop));
@@ -315,11 +242,6 @@
     const hookEyePageY = (newHookTop + HOOK_EYE_Y); // page Y for hook eye
     const visibleHeight = Math.max(0, hookEyePageY - rodTip.y);
     lineEl.style.height = visibleHeight + 'px';
-    // If we just finished a drop, transition to jigging once we touch bottom
-    if (hookState.phase === 'drop' && Math.abs(clampedTop - hookState.targetY) < 3) {
-      hookState.phase = 'jig_up';
-      hookState.lastChange = now;
-    }
 
     if (FEATURES.casting) stepCast(now);
   }

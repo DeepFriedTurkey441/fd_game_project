@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fish Dodge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game">
+    <div id="air" aria-hidden="true"></div>
+    <div id="waterline" aria-hidden="true"></div>
+    <!-- Decorative background layers (non-interactive) -->
+    <div id="light-rays" aria-hidden="true"></div>
+    <div id="caustics" aria-hidden="true"></div>
+    <!-- Realistic aquarium background (SVG) -->
+    <svg id="aquarium-bg" viewBox="0 0 1200 600" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="plantGrad1" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#0b6fb8"/>
+          <stop offset="100%" stop-color="#35d0ff"/>
+        </linearGradient>
+        <linearGradient id="leafGreen" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#0a7f3b"/>
+          <stop offset="60%" stop-color="#1fe36a"/>
+          <stop offset="100%" stop-color="#b4ffca"/>
+        </linearGradient>
+        <linearGradient id="leafRed" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#7a1626"/>
+          <stop offset="60%" stop-color="#ff4b55"/>
+          <stop offset="100%" stop-color="#ffd0d4"/>
+        </linearGradient>
+        <linearGradient id="leafPurple" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stop-color="#3b0a7f"/>
+          <stop offset="60%" stop-color="#a33bff"/>
+          <stop offset="100%" stop-color="#edd4ff"/>
+        </linearGradient>
+        <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f6e7c2"/>
+          <stop offset="100%" stop-color="#c7a56e"/>
+        </linearGradient>
+      </defs>
+      <!-- subtle background vignette -->
+      <rect x="0" y="0" width="1200" height="600" fill="url(#plantGrad1)" opacity="0.25"/>
+      <!-- substrate -->
+      <rect x="0" y="520" width="1200" height="80" fill="url(#sandGrad)"/>
+      <!-- rocks -->
+      <g fill="#3c3f52">
+        <ellipse cx="140" cy="540" rx="70" ry="30"/>
+        <ellipse cx="320" cy="550" rx="90" ry="36"/>
+        <ellipse cx="980" cy="548" rx="110" ry="40"/>
+      </g>
+      <!-- tall plants left -->
+      <g fill="url(#leafGreen)">
+        <path d="M110 600 C120 520, 90 480, 120 420 C150 360,130 320,140 280 C150 240,140 220,150 200" stroke="#0f9b50" stroke-width="4"/>
+        <path d="M150 600 C160 520, 140 500, 170 450 C200 400,180 360,190 320 C200 280,190 250,200 230" stroke="#0f9b50" stroke-width="4"/>
+      </g>
+      <!-- mid plants center -->
+      <g fill="url(#leafPurple)">
+        <path d="M560 600 C560 530, 520 500, 540 450 C560 410,550 380,560 350" stroke="#6e2ed6" stroke-width="4"/>
+        <path d="M600 600 C600 520, 590 500, 620 460 C640 430,630 400,640 370" stroke="#6e2ed6" stroke-width="4"/>
+      </g>
+      <!-- red plants right -->
+      <g fill="url(#leafRed)">
+        <path d="M1010 600 C1010 520, 960 500, 980 450 C1000 410,990 380,1000 350" stroke="#cc2034" stroke-width="4"/>
+        <path d="M1060 600 C1060 520, 1030 500, 1060 460 C1080 430,1070 400,1080 370" stroke="#cc2034" stroke-width="4"/>
+      </g>
+    </svg>
+    <div class="boat" aria-label="small fishing boat" title="Fishing boat" style="left: 26vw;">
+      <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- hull -->
+        <path d="M10 40 L100 40 L88 52 L22 52 Z" fill="#8b3e2f" stroke="#5e291f" stroke-width="2"/>
+        <!-- fisherman (simple) -->
+        <circle cx="75" cy="24" r="4" fill="#e0c2a8"/>
+        <path id="arm" d="M75 28 L75 38" stroke="#2b2b2b" stroke-width="3"/>
+        <path id="rod" d="M75 32 L82 34" stroke="#2b2b2b" stroke-width="2"/>
+        <!-- fishing rod (angled out over water) -->
+        <path d="M82 34 Q 94 22 110 14" stroke="#1f4b7a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="line" aria-hidden="true"></div>
+      <svg class="hook" aria-hidden="true" viewBox="0 0 24 36">
+        <!-- J‑shaped hook: black stroke, no fill -->
+        <path d="M16 2 V20 C16 30 6 32 5 24" fill="none" stroke="#000" stroke-width="3.2" stroke-linecap="round"/>
+        <!-- Barb -->
+        <path d="M6 23 L10 18" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div id="fish" aria-label="fish"><span class="sprite" aria-hidden="true">🐟</span></div>
+    <!-- Soft ambient bubbles -->
+    <div id="bubbles" aria-hidden="true"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

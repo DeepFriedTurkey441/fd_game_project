@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fish Dodge</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="game">
+    <div id="air" aria-hidden="true"></div>
+    <div id="waterline" aria-hidden="true"></div>
+    <div class="boat" aria-label="small fishing boat" title="Fishing boat" style="left: 26vw;">
+      <svg viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- hull -->
+        <path d="M10 40 L100 40 L88 52 L22 52 Z" fill="#8b3e2f" stroke="#5e291f" stroke-width="2"/>
+        <!-- fisherman (simple) -->
+        <circle cx="75" cy="24" r="4" fill="#e0c2a8"/>
+        <path d="M75 28 L75 38" stroke="#2b2b2b" stroke-width="3"/>
+        <g id="rodGroup">
+          <path d="M75 32 L82 34" stroke="#2b2b2b" stroke-width="2"/>
+          <!-- fishing rod (angled out over water) -->
+          <path d="M82 34 Q 94 22 110 14" stroke="#1f4b7a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="line" aria-hidden="true"></div>
+      <svg class="hook" aria-hidden="true" viewBox="0 0 24 36">
+        <!-- J‑shaped hook: black stroke, no fill -->
+        <path d="M16 2 V20 C16 30 6 32 5 24" fill="none" stroke="#000" stroke-width="3.2" stroke-linecap="round"/>
+        <!-- Barb -->
+        <path d="M6 23 L10 18" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div id="fish" aria-label="fish"><span class="sprite" aria-hidden="true">🐟</span></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
